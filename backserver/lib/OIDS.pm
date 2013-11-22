@@ -12,12 +12,19 @@ use strict;
 use warnings;
 use Exporter;
 our @ISA = 'Exporter';
-our @EXPORT = qw($OID_sysUpTime $OID_agentCurrentCPUUtilization $OID_agentFreeMemory $OID_bsnAPStatsTimer $OID_cisco_product
+our @EXPORT = qw($cLApPrimaryControllerAddress $cLApSecondaryControllerAddress $bsnAPLocation $bsnAPReset $cLApIfMacAddress
+				$OID_sysUpTime $OID_agentCurrentCPUUtilization $OID_agentFreeMemory $OID_bsnAPStatsTimer $OID_cisco_product
 				$OID_bsnAPNumOfSlot $OID_grp_bsnMobileStationIpAddress $OID_grp_bsnMobileStationAPIfSlotId
 				$OID_grp_bsnMobileStationAPMacAddr  $OID_grp_bsnApIpAddress $OID_grp_bsnMobileStationStatus $OID_grp_bsnMobileStationStatsEntry
 				$OID_grp_bsnAPIfLoadParametersEntry $OID_grp_bsnAPIfLoadParametersEntry $OID_grp_bsnAPIfChannelInterferenceInfoEntry
 				$OID_grp_bsnAPIfPhyChannelNumber $OID_grp_bsnAPIfChannelNoiseInfoEntry %Numeric_Oid_arr %interested_oid);
 
+# FOR APVT
+our $cLApPrimaryControllerAddress ='.1.3.6.1.4.1.9.9.513.1.1.1.1.11';
+our $cLApSecondaryControllerAddress = '.1.3.6.1.4.1.9.9.513.1.1.1.1.13';
+our $bsnAPLocation = '.1.3.6.1.4.1.14179.2.2.1.1.4';
+our $bsnAPReset = '.1.3.6.1.4.1.14179.2.2.1.1.11';
+our $cLApIfMacAddress = '.1.3.6.1.4.1.9.9.513.1.1.1.1.2';
 # interested MIBs Infomation
 our $OID_sysUpTime = '.1.3.6.1.2.1.1.3.0';
 our $OID_agentCurrentCPUUtilization ='.1.3.6.1.4.1.14179.1.1.5.1.0';

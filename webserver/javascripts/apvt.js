@@ -9,6 +9,14 @@ function pageload() {
 	alert('Hit OK, and then wait for the page to be loaded.');
 }
 
+
+function newpage(link)
+{
+	window.open(link);
+	disable()
+}
+
+
 function checkMACAddress() {
 	var macAddress=document.getElementById('mac').value;
 	var macAddressRegExp1=/^(?:[0-9A-F]{2}([-:]))(?:[0-9A-F]{2}\1){4}[0-9A-F]{2}$/i;
@@ -35,10 +43,10 @@ function checkMACAddress() {
 }
 
 function disable(){
-	document.getElementById("videolist").disabled=true;
+	document.getElementById("apreboot").disabled=true;
 }
 function enable(){
-	document.getElementById("videolist").disabled=false;
+	document.getElementById("apreboot").disabled=false;
 }
 
 
