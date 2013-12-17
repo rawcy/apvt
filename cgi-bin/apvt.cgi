@@ -18,17 +18,15 @@ use XML::Simple;
 use File::Slurp;
 use FindBin;
 use Time::HiRes qw( time );
-#require "$FindBin::Bin/conf/apvtweb.conf";
+require "$FindBin::Bin/conf/apvtweb.conf";
+require "$FindBin::Bin/lib/common.pl";
+use vars qw ($perl $updateApconfig $searchAp $fetchPreset $getApGroupList $joinApGroup $login $rebootAp);
 my $start = time();
 $ENV{PATH}="/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin";
 my $email = "yinche\@cisco.com";
 my $client_ip = $ENV{'REMOTE_ADDR'};
 my $host = $ENV{'SERVER_NAME'};
-my $clients_info;
-my $info_text;
 my $cur_dir = getcwd(); 
-my $perl = '/usr/bin/perl';
-my $ssh = '/usr/bin/ssh';
 my $script_name = $0;
 $script_name =~ s/$cur_dir\///;
 
@@ -61,7 +59,7 @@ if (@fields == 0) {
     
 EndHTML
     print "<div id='loginResult' style='display:none;'> </div>";
-    print start_form(-id => 'loginForm', -method=>'POST', -action=>"http://$host/cgi-bin/$script_name", -onSubmit=>"javascript:return login()&&checkMACAddress()&&checkPreset();"), hidden('client_ip', $client_ip), "<br>",
+    print start_form(-id => 'loginForm', -method=>'POST', -action=>"http://$host/cgi-bin/$script_name", -onSubmit=>"javascript:return login('/cgi-bin/$login')&&checkMACAddress()&&checkPreset();"), hidden('client_ip', $client_ip), "<br>",
     	"<fieldset> <legend>Enter information</legend> <p> <div id='username'> <label for='username'>Username</label> </div> <br />",
     	textfield( -name => 'userid', -id => 'userid', -size => 20, -maxlength => 20), "</p> <p> <div id='preset'> <label for='preset'>Preset</label> </div> <br />",
     	textfield( -name => 'preset', -id => 'preset_id', -size => 20, -maxlength => 17), "</p> <p> <div id='mac_div'> <label for='mac'>AP Mac Address (Optinal)</label> </div> <br />",
@@ -73,7 +71,7 @@ EndHTML
     my $preset = param('preset');
     my $userid = param('userid');
     my $ap_mac;
-    my $search_ap = "$perl searchAP.pl $client_ip";
+    my $search_ap = "$perl $searchAp $client_ip";
     if (param('ap_mac') != "FF:FF:FF:FF:FF:FF") {
         $ap_mac = mac_hex_decimal(param('ap_mac'));
         $search_ap .= " $ap_mac";
@@ -100,9 +98,9 @@ EndHTML
 EndHTML
     } else {
     	my ($ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = split(',', $result_data);
-    	my $update_result = `$perl fetchPreset.pl $preset`;
+    	my $update_result = `$perl $fetchPreset $preset`;
     	my ($ap_name_u, $p_wlc_u, $s_wlc_u, $location_u) =  split(',', $update_result);
-        my $ap_grp_list = `$perl getApGroupList.pl $preset`;
+        my $ap_grp_list = `$perl $getApGroupList $preset`;
         my @ap_grp_list = split(',', $ap_grp_list);
         print <<EndHTML;
     	<div class="content_inner_section">
@@ -160,7 +158,7 @@ EndHTML
     my $crt_wlc = param('p_wlc');
     my $preset = param('preset');
     my $ap_rf_dec = mac_hex_decimal(param('ap_rf_hex'));
-    my $result = `$perl searchAP.pl $client_ip $ap_rf_dec $preset`;
+    my $result = `$perl $searchAp $client_ip $ap_rf_dec $preset`;
     my ($error, $result_data) = split(';', $result, 2);
     my ($ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = split(',', $result_data);
     print <<EndHTML;
@@ -213,7 +211,7 @@ EndHTML
     my $ap_rf_dec = mac_hex_decimal($ap_rf_hex);
     my $mid = Time::HiRes::gettimeofday();
     printf("\n%.2f\n", $mid - $start);
-    my $update_result = `$perl updateAPConfig.pl $ap_rf_hex $preset $ap_name $location $client_ip`;
+    my $update_result = `$perl $updateApconfig $ap_rf_hex $preset $ap_name $location $client_ip`;
     my ($ap_name_u, $p_wlc_u, $s_wlc_u, $location_u, $err) =  split(',', $update_result);
     print <<EndHTML;
     
@@ -244,8 +242,8 @@ EndHTML
         </table>
     <button id="apreboot" onclick="newpage('http://$host/cgi-bin/rebootAP.cgi?ap_mac=$ap_rf_hex&ap_grp=$ap_grp')">Reboot AP $ap_rf_hex</button>
     <br><br>
-    <h2> Waiting til the AP is up after reboot the AP, </h2>
-    <h2> Click "Validating AP Setting" button after client is associated with new SSID. </h2>
+    <h3> Waiting till the AP is up after reboot the AP, </h3>
+    <h3> Click "Validating AP Setting" button after client is associated with new SSID. </h3>
     <hr>
     <table>
         <tr>
@@ -259,9 +257,3 @@ EndHTML
 
 require "footer.cgi";
 print end_html;
-
-sub mac_hex_decimal{
-    my ($mac) = @_;
-    $mac =~ /([0-9A-Fa-f]{2})[\:|\-]([0-9A-Fa-f]{2})[\:|\-]([0-9A-Fa-f]{2})[\:|\-]([0-9A-Fa-f]{2})[\:|\-]([0-9A-Fa-f]{2})[\:|\-]([0-9A-Fa-f]{2})/;
-    return (sprintf ("%d.%d.%d.%d.%d.%d", hex($1),hex($2),hex($3),hex($4),hex($5),hex($6)));
-}

@@ -14,10 +14,10 @@ use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
 use FindBin;
 use File::Slurp;
 use lib "$FindBin::Bin/lib";
+require "$FindBin::Bin/conf/apvtweb.conf";
 
-my $perl = '/usr/bin/perl';
 
-use vars qw ($gatingWLC $gatingWLC_s $gatingCommunity %csv_file);
+use vars qw ($perl $joinApGroup);
 my $client_ip = $ENV{'REMOTE_ADDR'};
 print header;
 print start_html(-title => "Cisco APVT",
@@ -26,16 +26,9 @@ my @fields = param;
 if (@fields ==0) {
     print "<h2>ERROR: NO AP MAC address passed</h2>";  
 } elsif (param('ap_mac')) {
-    my $host;
-    if($client_ip=~ /[0-9]{2}\.[0-9]{2}\.129\.[0-9]{2}/) {
-        $host = $gatingWLC;
-    }elsif ($client_ip=~ /[0-9]{2}\.[0-9]{2}\.130\.[0-9]{2}/) {
-        $host = $gatingWLC_s;
-    }   
+      
     my $ap_rf_hex = param('ap_mac');
     my $ap_grp = param('ap_grp');
-    my $ap_rf_dec = mac_hex_decimal($ap_rf_hex);
-
     
     print "<div class='content_inner_section'>";
     print "<h2>The AP is rebooting, and it will take few minutes to allow the AP to get in working stats. </h2>";
@@ -45,6 +38,6 @@ if (@fields ==0) {
     </form>
 HTMLend
     print "</div>";
-    exec("$perl joinApGroup.pl $ap_rf_hex $ap_grp $client_ip");
+    exec("$perl $joinApGroup $ap_rf_hex $ap_grp $client_ip");
 }
 print end_html;

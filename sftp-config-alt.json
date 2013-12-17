@@ -19,7 +19,7 @@
     "password": "Cisco123",
     //"port": "22",
     
-    "remote_path": "/var/www/",
+    "remote_path": "/var/www/cgi-bin/",
     "ignore_regexes": [
         "\\.sublime-(project|workspace)", "sftp-config(-alt\\d?)?\\.json",
         "sftp-settings\\.json", "/venv/", "\\.svn", "\\.hg", "\\.git",

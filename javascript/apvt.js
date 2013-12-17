@@ -89,14 +89,14 @@ function login_reset() {
     document.getElementById('mac').classList.remove('clr_red');
 }
 
-function login() { // loginForm is submitted
+function login(login_url) { // loginForm is submitted
     var username = document.getElementById('userid').value; // get username
     var results = false;
     login_reset();
     if (username) { // values are not empty
       $.ajax({
         type: "GET",
-        url: "/cgi-bin/login.pl", // URL of the Perl script
+        url: login_url, // URL of the Perl script
         contentType: "application/json; charset=utf-8",
         async: false,
         dataType: "json",

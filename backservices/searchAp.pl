@@ -20,7 +20,7 @@ require "$FindBin::Bin/lib/common_snmp.pl";
 
 BEGIN { our $start_run = time(); }
 
-my ($client_ip, $AP_MAC_dec, $preset, $host, $community, $ERR);
+my ($host, $client_ip, $AP_MAC_dec, $preset, $community, $ERR);
 if (@ARGV >= 1) {
     $client_ip = $ARGV[0];
     if (@ARGV >=2 ) {
@@ -39,23 +39,23 @@ if (! -r "$FindBin::Bin/conf/apvt.conf") {
      exit 2;
 }
 # global variables
-my $perl = '/usr/bin/perl';
+
 require "$FindBin::Bin/conf/apvt.conf";
-use vars qw ($gatingWLC $gatingWLC_s $gatingCommunity %csv_file);
+use vars qw ($gatingWLC $gatingWLC_s $gatingCommunity %csv_file $perl);
 if(defined $preset){
     $host=$csv_file{$preset}{'p_wlc'};
     $community=$csv_file{$preset}{'community'};
 } else {
-    if($client_ip=~ /[0-9]{2}\.[0-9]{2}\.129\.[0-9]{2}/) {
+    if($client_ip =~ /[0-9]{2}\.[0-9]{2}\.129\.[0-9]{2}/) {
         $host = $gatingWLC;
-    } elsif ($client_ip=~ /[0-9]{2}\.[0-9]{2}\.130\.[0-9]{2}/) {
+    } elsif ($client_ip =~ /[0-9]{2}\.[0-9]{2}\.130\.[0-9]{2}/) {
         $host = $gatingWLC_s;
+    } else {
+        $host = $gatingWLC;
     }
     $community = $gatingCommunity;
 }
-if (!$host) {
-     $host = $gatingWLC_s;
-}
+
 #mac_hex_decimal($client_mac_hex);
 my ($error_msg, $ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = search_client($host, $community, $client_ip, $AP_MAC_dec);
 print "$error_msg;$ap_name,$ap_eth_hex,$ap_rf_hex,$ap_ip,$p_wlc,$s_wlc,$location,$ap_grp";

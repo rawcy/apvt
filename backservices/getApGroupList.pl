@@ -16,17 +16,7 @@ use OIDS;
 use Net::SNMP qw(:snmp);
 use Data::Dumper;
 
-require "$FindBin::Bin/lib/common_snmp.pl";
-if (! -r "$FindBin::Bin/conf/apvt.conf") {
-     print "ERROR: apvt.conf is not readable\n";
-     exit 1;
-}
-require "$FindBin::Bin/conf/apvt.conf";
-# global variables
-my $perl = '/usr/bin/perl';
-use vars qw ($gatingWLC $gatingWLC_s $gatingCommunity %csv_file);
-
-my ($preset, $host, $community, $client_ip, $ap_grp_list, $err_msg);
+my ($preset, $host, $community, $ap_grp_list, $err_msg);
 
 if (@ARGV >= 1) {
     $preset = $ARGV[0];
@@ -34,6 +24,18 @@ if (@ARGV >= 1) {
     print "ERROR: no argument passed";
     exit 1;
 }
+
+require "$FindBin::Bin/lib/common_snmp.pl";
+if (! -r "$FindBin::Bin/conf/apvt.conf") {
+     print "ERROR: apvt.conf is not readable\n";
+     exit 1;
+}
+require "$FindBin::Bin/conf/apvt.conf";
+# global variables
+
+use vars qw (%csv_file);
+
+
 
 $host = $csv_file{$preset}{'p_wlc'};
 $community = $csv_file{$preset}{'community'};
