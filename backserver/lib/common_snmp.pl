@@ -8,7 +8,7 @@
 ##  Project:      wMOS                      ##
 ##############################################
 
-use Net::SNMP;
+use Net::SNMP qw(:snmp);
 #use strict;
 #use warnings;
 ##Procedure Header
@@ -24,8 +24,8 @@ use Net::SNMP;
 sub snmp_connect {
     my ($hostname, $community) = @_;
 	
-	my $connection = `ping -c 3 -W 2 $hostname | grep -c "64 bytes"`; 
-	return ("the $hostname is not reachable\n") if $connection < 1;
+	#my $connection = `ping -c 3 -W 2 $hostname | grep -c "64 bytes"`; 
+	#return ("the $hostname is not reachable\n") if $connection < 1;
 
     my ($session, $error) = Net::SNMP->session(
                                -hostname      => $hostname,
@@ -45,6 +45,53 @@ sub snmp_connect {
 
     return ("", $session);
 } # of snmp_connect()
+
+
+sub bulk_cb {
+   my ($session, $table, $search_base, $grp_oids) = @_;
+   if (!defined($session->var_bind_list)) {
+
+      printf("ERROR: %s\n", $session->error);
+
+   } else {
+
+      # Loop through each of the OIDs in the response and assign
+      # the key/value pairs to the anonymous hash that is passed
+      # to the callback.  Make sure that we are still in the table
+      # before assigning the key/values.
+
+      my $next;
+
+      foreach my $oid (oid_lex_sort(keys(%{$session->var_bind_list}))) {
+#        print $bsnAPEntry . "-" . $search_base ."\n";
+         if (!oid_base_match($search_base, $oid)) {
+            $next = undef;
+            last;
+         }
+         $next = $oid;
+         if ( $oid =~ /$grp_oids/ ) {
+            $$table{$oid} = $session->var_bind_list->{$oid};
+         }
+      }
+
+      # If $next is defined we need to send another request 
+      # to get more of the table.
+
+      if (defined($next)) {
+
+         my $result = $session->get_bulk_request(
+            -callback       => [\&bulk_cb, $table, $search_base, $grp_oids],
+            -maxrepetitions => 10,
+            -varbindlist    => [$next]
+         );
+
+         if (!defined($result)) {
+            printf("ERROR: %s\n", $session->error);
+         }
+
+      }
+   }
+}
 
 ##Procedure Header
 # Name:
@@ -86,4 +133,23 @@ sub mac_hex_decimal{
    return (sprintf ("%d.%d.%d.%d.%d.%d", hex($1),hex($2),hex($3),hex($4),hex($5),hex($6)));
 }
 
+sub format_ip_hex {
+   my ($mac) = @_;
+   $mac = uc ($mac);
+   $mac =~ m/0X(..)(..)(..)(..)/;
+   return ("$1:$2:$3:$4");
+}
+
+sub ip_hex_decimal{
+   my ($mac) = @_;
+    
+    $mac =~ /([0-9A-Fa-f]{2})[\:|\-]([0-9A-Fa-f]{2})[\:|\-]([0-9A-Fa-f]{2})[\:|\-]([0-9A-Fa-f]{2})/;
+   return (sprintf ("%d.%d.%d.%d", hex($1),hex($2),hex($3),hex($4)));
+}
+
+sub ip_dec_hex {
+    my ($ip) = @_;
+    my ($a, $b, $c, $d)=($ip=~/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
+    return (sprintf ("%#.2x%.2x%.2x%.2x", $a,$b,$c,$d));
+}
 1;
