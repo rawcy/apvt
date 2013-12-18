@@ -16,3 +16,14 @@ nytprof.out
 pm_to_blib
 test/
 sftp-config.json
+*.sublime-project
+
+*.sublime-project
+
+apvt.sublime-project
+
+*.sublime-project
+
+apvt.sublime-workspace
+
+*.sublime-workspace
