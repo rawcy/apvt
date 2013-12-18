@@ -23,13 +23,13 @@ print header;
 print start_html(-title => "Cisco APVT",
                   -style=>{-src=>['/cgi-bin/css/apvt.css']} );
 my @fields = param;
-if (@fields ==0) {
+if (@fields == 0) {
     print "<h2>ERROR: NO AP MAC address passed</h2>";  
 } elsif (param('ap_mac')) {
       
     my $ap_rf_hex = param('ap_mac');
     my $ap_grp = param('ap_grp');
-    
+    my results = system("$perl $joinApGroup $ap_rf_hex $ap_grp $client_ip");
     print "<div class='content_inner_section'>";
     print "<h2>The AP is rebooting, and it will take few minutes to allow the AP to get in working stats. </h2>";
     print<<HTMLend;
@@ -38,6 +38,6 @@ if (@fields ==0) {
     </form>
 HTMLend
     print "</div>";
-    exec("$perl $joinApGroup $ap_rf_hex $ap_grp $client_ip");
+    
 }
 print end_html;

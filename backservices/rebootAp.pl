@@ -44,5 +44,7 @@ $ap_rf_dec = mac_hex_decimal($ap_rf_hex);
 
 my $result = `$snmpget -v2c -c $gatingCommunity $host $bsnAPReset.$ap_rf_dec`;
 $result = `$snmpset -v2c -c $gatingCommunity $host $bsnAPReset.$ap_rf_dec i 1`;
-
-print $result;
+my $string = quotemeta "$ap_rf_dec = INTEGER: 1";
+if($result =~ /$string/){
+    print "AP reboot Seccussful.";
+}

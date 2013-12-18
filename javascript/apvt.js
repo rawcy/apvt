@@ -51,6 +51,7 @@ function checkMACAddress() {
         $('div#loginResult').fadeIn();
         $('div#mac_div').addClass("clr_red");
         document.getElementById('mac').classList.add('clr_red');
+        $('div#loginResult').fadeIn();
         return false;
 	}
 	
@@ -66,6 +67,7 @@ function checkPreset () {
         $('div#loginResult').fadeIn();
         $('div#preset').addClass("clr_red");
         document.getElementById('preset_id').classList.add('clr_red');
+        $('div#loginResult').fadeIn();
 		return false;
 	}
 	return true;
@@ -117,6 +119,7 @@ function login(login_url) { // loginForm is submitted
             $('div#loginResult').addClass("error");
             $('div#username').addClass("clr_red");
             document.getElementById('userid').classList.add('clr_red');
+            $('div#loginResult').fadeIn();
           } // if
           else { // login was successful
             results = true;
@@ -130,8 +133,9 @@ function login(login_url) { // loginForm is submitted
       $('div#loginResult').addClass("error");
       $('div#username').addClass("clr_red");
       document.getElementById('userid').classList.add('clr_red');
+      $('div#loginResult').fadeIn();
     } // else
        //alert("test a " + results);
-    $('div#loginResult').fadeIn();
+    
     return results;
 };

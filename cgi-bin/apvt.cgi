@@ -210,7 +210,7 @@ EndHTML
     my $ap_grp =param('ap_grp');
     my $ap_rf_dec = mac_hex_decimal($ap_rf_hex);
     my $mid = Time::HiRes::gettimeofday();
-    printf("\n%.2f\n", $mid - $start);
+    # printf("\n%.2f\n", $mid - $start);
     my $update_result = `$perl $updateApconfig $ap_rf_hex $preset $ap_name $location $client_ip`;
     my ($ap_name_u, $p_wlc_u, $s_wlc_u, $location_u, $err) =  split(',', $update_result);
     print <<EndHTML;
@@ -252,7 +252,7 @@ EndHTML
     print start_form(-method=>'POST', -action=>"http://$host/cgi-bin/$script_name"), hidden('preset', $preset), hidden('ap_rf_hex', $ap_rf_hex),   
         hidden('p_wlc', $p_wlc_u), "<br>", submit(-name=>'sub_form', -value=>'Validating AP Setting'), end_form, "&nbsp; &nbsp; </td><td>&nbsp; &nbsp;</td><td><button onclick='enable()'>Reset</button></td></tr></table></div>";
     my $end = Time::HiRes::gettimeofday();
-    printf("\n%.2f\n", $end - $mid);
+    # printf("\n%.2f\n", $end - $mid);
 }
 
 require "footer.cgi";
