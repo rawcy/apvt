@@ -13,7 +13,8 @@ function pageload() {
 function newpage(link)
 {
 	window.open(link);
-	disable();
+  return true;
+	// disable();
 }
 
 function updateSync(val, tag){
@@ -73,12 +74,18 @@ function checkPreset () {
 	return true;
 }
 
-function disable(){
-	document.getElementById("apreboot").disabled=true;
+function disable(id_t){
+    document.getElementById(id_t).disabled=true;
+    $('div#reboot').fadeOut();
+    $('div#rebootedMsg').fadeIn();
+    return true;
 }
 
-function enable(){
-	document.getElementById("apreboot").disabled=false;
+function enable(id_f){
+	document.getElementById(id_f).disabled=false;
+    $('div#reboot').fadeIn();
+    $('div#rebootedMsg').fadeOut();
+    return true;
 }
 
 function login_reset() {

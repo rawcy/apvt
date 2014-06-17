@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 ##############################################
-##  Author:       Yin Chen                  ##                     
+##  Author:       Yin Chen                  ##
 ##  Contact:      yinche@cisco.com          ##
 ##  Data:         Dec 17 2013               ##
 ##  Project:      apvt                      ##

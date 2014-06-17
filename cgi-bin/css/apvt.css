@@ -63,6 +63,7 @@ input[type=text] {
 }
 
 input[type=submit], button {
+    margin-top: 20px;
 	padding: 4px 10px;
     border: 1px solid #C7C7C7;
     background: -webkit-gradient(linear, left top, left bottom, from(#178FD7), to(#173CD7));
@@ -137,8 +138,8 @@ input[type=submit]:active, button:active {
 .content_table tr:hover{
 	box-shadow: 0px 0px 5px 5px #000000;
 }
-.content_table tr:nth-child(odd){ background-color:#DBDBDB; }
-.content_table tr:nth-child(even)    { background-color:#FCFCFC; }
+.content_table tr:nth-child(odd) { background-color:#DBDBDB; }
+.content_table tr:nth-child(even) { background-color:#FCFCFC; }
 .content_table td{
 	vertical-align:middle;
 	border:0px solid #000000;
@@ -166,8 +167,22 @@ input[type=submit]:active, button:active {
 	width:auto;
 }
 
-fieldset {padding:0 1.4em 1.4em 1.4em;margin:0 0 1.5em 0;border:1px solid #ccc;}
-legend {font-weight:bold;font-size:1.2em;margin-top:-0.2em;margin-bottom:1em;}
+fieldset {
+    padding:0 1.4em 1.4em 1.4em;
+    margin:0 0 1.5em 0;border:
+    1px solid #ccc;
+    margin-left:auto;
+    margin-right:auto;
+    width:70%;
+}
+
+legend {
+    font-weight:bold;
+    font-size:1.2em;
+    margin-top:-0.2em;
+    margin-bottom:1em;
+}
+
 fieldset, #IE8#HACK {padding-top:1.4em;}
 legend, #IE8#HACK {margin-top:0;margin-bottom:0;}
 .error, .alert, .notice, .success, .info {padding:0.8em;margin-bottom:1em;border:2px solid #ddd;}

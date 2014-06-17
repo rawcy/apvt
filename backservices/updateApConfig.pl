@@ -33,17 +33,17 @@ require "$FindBin::Bin/lib/common_snmp.pl";
 require "$FindBin::Bin/conf/apvt.conf";
 use vars qw ($gatingWLC $gatingWLC_s $gatingCommunity %csv_file $perl $snmpget $snmpset $searchAp);
 
-if($client_ip =~ /[0-9]{2}\.[0-9]{2}\.129\.[0-9]{2}/) {
+if($client_ip =~ /[0-9]{2}\.[0-9]{2}\.97\.[0-9]{2}/) {
     $host = $gatingWLC;
-} elsif ($client_ip =~ /[0-9]{2}\.[0-9]{2}\.130\.[0-9]{2}/) {
+} elsif ($client_ip =~ /[0-9]{2}\.[0-9]{2}\.98\.[0-9]{2}/) {
     $host = $gatingWLC_s;
 } else {
     $host = $gatingWLC;
 }
-
 my $ap_rf_dec = mac_hex_decimal($ap_rf_hex);
 my $p_wlc_ip = ip_dec_hex($csv_file{$preset}{'p_wlc'});
 my $s_wlc_ip = ip_dec_hex($csv_file{$preset}{'s_wlc'});
+
 my $read = `$snmpget -v2c -c $gatingCommunity $host $bsnAPName.$ap_rf_dec $bsnAPLocation.$ap_rf_dec`;
 my $result = `$snmpset -v2c -c $gatingCommunity $host $bsnAPName.$ap_rf_dec s $ap_name $bsnAPLocation.$ap_rf_dec s $ap_location $cLApPrimaryControllerAddress.$ap_rf_dec x $p_wlc_ip $cLApSecondaryControllerAddress.$ap_rf_dec x $s_wlc_ip`;
 if($result =~ /error/){

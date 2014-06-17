@@ -53,16 +53,16 @@ my @fields = param;
 if (@fields == 0) {
     print <<EndHTML;
     <div class="content_inner_section">
-    <h2>Cisco AP Validation Tool</h2>
+    <center><h2>Cisco AP Validation Tool</h2>
     
-    <h3>This is a demo version, interal user only</h3>
+    <h3>This is a demo version - Interal use only</h3></center>
     
 EndHTML
     print "<div id='loginResult' style='display:none;'> </div>";
     print start_form(-id => 'loginForm', -method=>'POST', -action=>"http://$host/cgi-bin/$script_name", -onSubmit=>"javascript:return login('/cgi-bin/$login')&&checkMACAddress()&&checkPreset();"), hidden('client_ip', $client_ip), "<br>",
-    	"<fieldset> <legend>Enter information</legend> <p> <div id='username'> <label for='username'>Username</label> </div> <br />",
-    	textfield( -name => 'userid', -id => 'userid', -size => 20, -maxlength => 20), "</p> <p> <div id='preset'> <label for='preset'>Preset</label> </div> <br />",
-    	textfield( -name => 'preset', -id => 'preset_id', -size => 20, -maxlength => 17), "</p> <p> <div id='mac_div'> <label for='mac'>AP Mac Address (Optinal)</label> </div> <br />",
+    	"<fieldset> <legend>Enter information</legend>  <div id='username'> <p> <label for='username'>Username</label> </p> </div> <p>",
+    	textfield( -name => 'userid', -id => 'userid', -size => 20, -maxlength => 20), "</p> <div id='preset'> <p> <label for='preset'>Preset</label> </p> </div> <p>",
+    	textfield( -name => 'preset', -id => 'preset_id', -size => 20, -maxlength => 17), "</p> <div id='mac_div'> <p> <label for='mac'>AP Mac Address (Optinal)</label> </p> </div> <p>",
     	textfield( -name => 'ap_mac', -id => 'mac', -default => 'FF:FF:FF:FF:FF:FF', -size => 20, -maxlength => 17), "</p> <p>",
     	
         submit(-name=>'sub_form', -value=>'Start Validation'), "</p>", "</fieldset>", end_form, "</div>";
@@ -70,11 +70,12 @@ EndHTML
 } elsif (param('ap_mac')) {
     my $preset = param('preset');
     my $userid = param('userid');
-    my $ap_mac;
+    my $ap_mac ;
     my $search_ap = "$perl $searchAp $client_ip";
-    if (param('ap_mac') != "FF:FF:FF:FF:FF:FF") {
-        $ap_mac = mac_hex_decimal(param('ap_mac'));
-        $search_ap .= " $ap_mac";
+    if (param('ap_mac') ne "FF:FF:FF:FF:FF:FF") {
+        $ap_mac = param('ap_mac');
+        my $ap_mac_dec = mac_hex_decimal(param('ap_mac'));
+        $search_ap .= " $ap_mac_dec";
     }
     my $result = `$search_ap`;
     my ($error, $result_data) = split(";", $result, 2);
@@ -89,7 +90,7 @@ EndHTML
             print "<p>or enter the target AP's MAC address on preivous page</p>"; 
         } else {
             print "Please check the AP MAC address $ap_mac entered is correct.</p>";
-            print "Contact Admin if you still have problem.</p>";
+            print "Or contact Admin if you still have problem.</p>";
         }  
         print <<EndHTML;
                 </div>
@@ -121,7 +122,7 @@ EndHTML
 	            <tr>
 	                <td>AP Name </td>
 	                <td>$ap_name</td>
-	                <td id="ap_name_u"><input class="clr_orange" type="text" value="$ap_name_u" name="ap_name_u" onchange="updateSync(this.value, "ap_name_input")"></td>
+	                <td id="ap_name_u"><input class="clr_orange" type="text" value="$ap_name_u" name="ap_name_u" onchange="updateSync(this.value, 'ap_name_input')"></td>
 	            </tr>
 	            <tr>
 	                <td>AP Primary Controller Address</td>
@@ -136,7 +137,7 @@ EndHTML
 	            <tr>
 	                <td>AP Location</td>
 	                <td>$location</td>
-	                <td id="ap_location_u"><input class="clr_orange" type="text" value="$location_u" name="location_u" onchange="updateSync(this.value, "location_input")"></td>
+	                <td id="ap_location_u"><input class="clr_orange" type="text" value="$location_u" name="location_u" onchange="updateSync(this.value, 'location_input')"></td>
 	            </tr>
                 <tr>
                     <td>AP Group</td>
@@ -151,13 +152,14 @@ EndHTML
 EndHTML
     print start_form(-method=>'POST', -action=>"http://$host/cgi-bin/$script_name"), 
     	hidden('preset', $preset), hidden(-id => 'ap_name_input', -name=>'ap_name', -value=>$ap_name_u), hidden(-id => 'location_input', -name=>'location', -value=>$location_u), hidden(-id => 'ap_grp_input', -name=> 'ap_grp', -value=>$ap_grp_list[0]),
-        hidden('ap_rf_hex', $ap_rf_hex), "&nbsp; &nbsp", submit(-name=>'sub_form', -value=>'Push AP Configuration'), end_form;
+        hidden('ap_rf_hex', $ap_rf_hex), submit(-name=>'sub_form', -value=>'Push AP Configuration'), end_form;
     print "</div>";
     }
 }   elsif (param('p_wlc')) {
     my $crt_wlc = param('p_wlc');
     my $preset = param('preset');
     my $ap_rf_dec = mac_hex_decimal(param('ap_rf_hex'));
+
     my $result = `$perl $searchAp $client_ip $ap_rf_dec $preset`;
     my ($error, $result_data) = split(';', $result, 2);
     my ($ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = split(',', $result_data);
@@ -211,6 +213,7 @@ EndHTML
     my $ap_rf_dec = mac_hex_decimal($ap_rf_hex);
     my $mid = Time::HiRes::gettimeofday();
     # printf("\n%.2f\n", $mid - $start);
+    #print "$perl $updateApconfig $ap_rf_hex $preset $ap_name $location $client_ip";
     my $update_result = `$perl $updateApconfig $ap_rf_hex $preset $ap_name $location $client_ip`;
     my ($ap_name_u, $p_wlc_u, $s_wlc_u, $location_u, $err) =  split(',', $update_result);
     print <<EndHTML;
@@ -240,17 +243,21 @@ EndHTML
                 <td>AP Group <spam class="clr_red">(not updated yet)</spam><spam class="help" title="reboot AP is required to update AP Group">?<spam></td>
                 <td>$ap_grp</td>
         </table>
-    <button id="apreboot" onclick="newpage('http://$host/cgi-bin/rebootAP.cgi?ap_mac=$ap_rf_hex&ap_grp=$ap_grp')">Reboot AP $ap_rf_hex</button>
-    <br><br>
-    <h3> Waiting till the AP is up after reboot the AP, </h3>
-    <h3> Click "Validating AP Setting" button after client is associated with new SSID. </h3>
+    <div id="reboot">
+        <button id="apreboot" onclick="javascript:return disable('apreboot')&&newpage('http://$host/cgi-bin/rebootAP.cgi?ap_mac=$ap_rf_hex&ap_grp=$ap_grp&preset=$preset');">Reboot AP $ap_rf_hex</button>
+    </div>
+    <div id='rebootedMsg' style="display:none;">
+    <h4> Waiting till the AP is up after reboot the AP, </h3>
+    <h4> Click "Validating AP Setting" button after client is associated with new SSID. </h3>
+
     <hr>
+
     <table>
         <tr>
             <td>
 EndHTML
     print start_form(-method=>'POST', -action=>"http://$host/cgi-bin/$script_name"), hidden('preset', $preset), hidden('ap_rf_hex', $ap_rf_hex),   
-        hidden('p_wlc', $p_wlc_u), "<br>", submit(-name=>'sub_form', -value=>'Validating AP Setting'), end_form, "&nbsp; &nbsp; </td><td>&nbsp; &nbsp;</td><td><button onclick='enable()'>Reset</button></td></tr></table></div>";
+        hidden('p_wlc', $p_wlc_u), "<br>", submit(-name=>'sub_form', -value=>'Validating AP Setting'), end_form, "&nbsp; &nbsp; </td><td>&nbsp; &nbsp;</td><td><button id='reset' onclick=\"javascript:return enable('apreboot');\">Reset</button></td></tr></table></div></div>";
     my $end = Time::HiRes::gettimeofday();
     # printf("\n%.2f\n", $end - $mid);
 }

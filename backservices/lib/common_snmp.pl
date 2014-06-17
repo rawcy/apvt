@@ -11,6 +11,8 @@
 use Net::SNMP qw(:snmp);
 #use strict;
 #use warnings;
+
+
 ##Procedure Header
 # Name: snmp_connect
 # Description:
@@ -152,4 +154,26 @@ sub ip_dec_hex {
     my ($a, $b, $c, $d)=($ip=~/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
     return (sprintf ("%#.2x%.2x%.2x%.2x", $a,$b,$c,$d));
 }
+
+sub event_log {
+    my ($events, $input_file) = @_;
+
+    unless (-e $input_file) {
+        open( my $fh, ">",  input_file) || warn "Can't open $input_file: $!";
+    } else {
+        open( my $fh, ">>", $input_file ) || warn "Can't open $input_file: $!";
+    }
+    $timestamp = scalar localtime time;
+    print $fh "$timestamp:\t$events";
+    close $fh;
+}
+
+sub string_dec {
+    my ($string) = @_;
+    my @chars = split("", $string);
+    my $ascii_dec = "." . @chars;
+    $ascii_dec .= "." . ord($_) foreach (@chars);
+    return $ascii_dec;
+}
+
 1;

@@ -1,3 +1,3 @@
-ap_id,p_wlc,s_wlc,location,community,name_prefix
-1,100.78.10.3,10.0.0.1,Dallas,wwwprcdnsrpcomm,dallas
-2,100.78.10.2,10.0.0.2,RCDN,wwwprcdnsrpcomm,rcdn
+ap_id,p_wlc_name,s_wlc_name,p_wlc,s_wlc,location,community,name_prefix
+1,wwwp-rcdn-srp-ct5508-04,wwwp-rcdn-srp-ct5508-03,100.78.10.3,10.0.0.1,Dallas,wwwprcdnsrpcomm,dallas
+2,wwwp-rcdn-srp-ct5508-03,wwwp-rcdn-srp-ct5508-04,100.78.10.2,10.0.0.2,RCDN,wwwprcdnsrpcomm,rcdn

@@ -17,7 +17,7 @@ print<<HTML;
 	<table>
 	<tr>
 		<td width="20%"><img src="icon/header_l.jpg" width="160" height="80"/></td>
-		<td width="60%">Cisco AP valiadation Tool</td>
+		<td width="60%">Cisco AP Validation Tool</td>
 		<td width="20%"><img src="icon/header_r.jpg" width="180" height="80"/></td>
 	</tr>
 	</table>

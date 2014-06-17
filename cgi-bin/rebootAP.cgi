@@ -29,15 +29,16 @@ if (@fields == 0) {
       
     my $ap_rf_hex = param('ap_mac');
     my $ap_grp = param('ap_grp');
-    my results = system("$perl $joinApGroup $ap_rf_hex $ap_grp $client_ip");
+    my $preset = param('preset');
     print "<div class='content_inner_section'>";
-    print "<h2>The AP is rebooting, and it will take few minutes to allow the AP to get in working stats. </h2>";
+    print "<h2>The AP is rebooting, please waiting </h2>";
     print<<HTMLend;
     <form method="post">
         <button action="action" value="Close Window" onclick="javascript:window.close();">Close Window</button>
     </form>
 HTMLend
     print "</div>";
-    
+    # print "$perl $joinApGroup $ap_rf_hex $ap_grp $client_ip $preset";
+    my $results = `$perl $joinApGroup $ap_rf_hex $ap_grp $client_ip $preset`;
 }
 print end_html;
