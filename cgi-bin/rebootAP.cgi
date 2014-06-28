@@ -20,7 +20,7 @@ require "$FindBin::Bin/conf/apvtweb.conf";
 use vars qw ($perl $joinApGroup);
 my $client_ip = $ENV{'REMOTE_ADDR'};
 print header;
-print start_html(-title => "Cisco APVT",
+print start_html(-title => "Cisco APPT",
                   -style=>{-src=>['/cgi-bin/css/apvt.css']} );
 my @fields = param;
 if (@fields == 0) {

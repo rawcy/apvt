@@ -12,7 +12,6 @@ use CGI qw(:standard);
 use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
 use strict;
 use FileHandle;
-use CGI::Carp 'fatalsToBrowser';
 use Cwd;
 use XML::Simple;
 use File::Slurp;

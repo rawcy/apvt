@@ -22,7 +22,7 @@ if (@ARGV >= 2) {
     print "ERROR: no argument passed";
     exit 1;
 }
-if (! -r "$FindBin::Bin/conf/apvt.conf") {
+if (! -r "$FindBin::Bin/conf/appt.conf") {
      print "ERROR: apvt.conf is not readable\n";
 
      exit 1;

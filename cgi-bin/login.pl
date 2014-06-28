@@ -4,11 +4,11 @@ use File::Slurp;
 use strict;
 use warnings;
 use FindBin;
+use CGI::Session;
 
 # read the CGI params
 my $cgi = CGI->new;
 my $username = $cgi->param("username");
-
 my (%userList, $json);
 my $conf_dir = "$FindBin::Bin/conf";
 ## connect to the database

@@ -30,7 +30,7 @@ if (@ARGV >= 5) {
 
 # my $start = Time::HiRes::gettimeofday();
 require "$FindBin::Bin/lib/common_snmp.pl";
-require "$FindBin::Bin/conf/apvt.conf";
+require "$FindBin::Bin/conf/appt.conf";
 use vars qw ($gatingWLC $gatingWLC_s $gatingCommunity %csv_file $perl $snmpget $snmpset $searchAp);
 
 if($client_ip =~ /[0-9]{2}\.[0-9]{2}\.97\.[0-9]{2}/) {

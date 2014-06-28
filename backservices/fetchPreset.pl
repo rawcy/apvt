@@ -10,14 +10,13 @@
 use strict;
 use warnings;
 use FindBin;
-use Net::IP;
 use File::Slurp;
 use lib "$FindBin::Bin/lib";
 use OIDS;
 use Data::Dumper;
 
 require "$FindBin::Bin/lib/common_snmp.pl";
-require "$FindBin::Bin/conf/apvt.conf";
+require "$FindBin::Bin/conf/appt.conf";
 use vars qw (%csv_file);
 
 my ($preset);

@@ -1,0 +1,3 @@
+property,type,service_code,division,primary_controller_name,primary_controller_ip,secondary_controller_name,secondary_controller_ip,ap_group,
+BHN-PDN,hotel,PROD,TPA,HROC-WCE-5508-1,65.32.12.37,,,Cisco_Test_1
+BHN-STG,hospital,STAG,MCO,HROC-WCE-8510-1,65.32.12.36,,,Cisco_Test

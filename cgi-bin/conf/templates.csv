@@ -1,0 +1,3 @@
+name,color_code,fields,size,type
+hotel,#F3F781,Building;Floor;Location;Other,4;2;5;30,d;d;t;t
+hospital,#81DAF5,Building;Floor;Location;Other,4;2;5;30,d;d;t;t
