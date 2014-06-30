@@ -16,13 +16,18 @@ use lib "$FindBin::Bin/lib";
 use OIDS;
 use Data::Dumper;
 
-my ($host, $client_ip, $ap_name, $ap_location, $ap_rf_hex, $preset);
-if (@ARGV >= 5) {
-	$ap_rf_hex = $ARGV[0];
-	$preset = $ARGV[1];
-	$ap_name = $ARGV[2];
-	$ap_location = $ARGV[3];
-    $client_ip = $ARGV[4];
+my ($ap_name, $ap_location, $ap_rf_hex, $primary_controller_name, $primary_controller_ip, $secondary_controller_name, $secondary_controller_ip, $ap_group);
+if (@ARGV >= 6) {
+    $ap_name = $ARGV[0];
+	$ap_rf_hex = $ARGV[1];
+    $primary_controller_name = $ARGV[2];
+    $primary_controller_ip = $ARGV[3];
+	$ap_location = $ARGV[4];
+    $ap_group = $ARGV[5];
+    if(@ARGV >= 8){
+        $secondary_controller_name = $ARGV[6];
+        $secondary_controller_ip = $ARGV[7];
+    }    
 } else {
 	print "ERROR: no argument passed";
 	exit 1;
@@ -31,31 +36,13 @@ if (@ARGV >= 5) {
 # my $start = Time::HiRes::gettimeofday();
 require "$FindBin::Bin/lib/common_snmp.pl";
 require "$FindBin::Bin/conf/appt.conf";
-use vars qw ($gatingWLC $gatingWLC_s $gatingCommunity %csv_file $perl $snmpget $snmpset $searchAp);
+use vars qw ($gatingWLC $gatingCommunity $perl $snmpget $snmpset);
 
-if($client_ip =~ /[0-9]{2}\.[0-9]{2}\.97\.[0-9]{2}/) {
-    $host = $gatingWLC;
-} elsif ($client_ip =~ /[0-9]{2}\.[0-9]{2}\.98\.[0-9]{2}/) {
-    $host = $gatingWLC_s;
-} else {
-    $host = $gatingWLC;
-}
 my $ap_rf_dec = mac_hex_decimal($ap_rf_hex);
-my $p_wlc_ip = ip_dec_hex($csv_file{$preset}{'p_wlc'});
-my $s_wlc_ip = ip_dec_hex($csv_file{$preset}{'s_wlc'});
 
-my $read = `$snmpget -v2c -c $gatingCommunity $host $bsnAPName.$ap_rf_dec $bsnAPLocation.$ap_rf_dec`;
-my $result = `$snmpset -v2c -c $gatingCommunity $host $bsnAPName.$ap_rf_dec s $ap_name $bsnAPLocation.$ap_rf_dec s $ap_location $cLApPrimaryControllerAddress.$ap_rf_dec x $p_wlc_ip $cLApSecondaryControllerAddress.$ap_rf_dec x $s_wlc_ip`;
-if($result =~ /error/){
-    print "'','','',$result";
-}
-else {
-	my $result = `$perl $searchAp $client_ip $ap_rf_dec`;
-	my ($error, $result_data) = split(";", $result, 2);
-	
-	my ($ap_name_a, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location) = split(',', $result_data);
-	
-    print "$ap_name_a,$p_wlc,$s_wlc,$location,''";
-}
+my $read = `$snmpget -v2c -c $gatingCommunity $gatingWLC $bsnAPName.$ap_rf_dec $bsnAPLocation.$ap_rf_dec`;
+my $result = `$snmpset -v2c -c $gatingCommunity $gatingWLC $bsnAPName.$ap_rf_dec s $ap_name $bsnAPLocation.$ap_rf_dec s $ap_location $bsnAPPrimaryMwarName.$ap_rf_dec s $primary_controller_name $cLApPrimaryControllerAddress.$ap_rf_dec s $primary_controller_ip $bsnAPSecondaryMwarName.$ap_rf_dec s $secondary_controller_name $cLApSecondaryControllerAddress.$ap_rf_dec s $secondary_controller_ip $bsnAPGroupVlanName.$ap_rf_dec s $ap_group`;
+
+
 # my $end = Time::HiRes::gettimeofday();
 # printf("\n%.2f\n", $end - $start);

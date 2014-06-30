@@ -61,7 +61,6 @@ function checkMACAddress() {
     }
     
     $('div#macErrorMsg').addClass("success");
-    createCookie('ap_mac', macAddress);
     return true;
 }
 
@@ -103,7 +102,7 @@ function resetLogin() {
     // document.getElementById('mac').classList.remove('clr_red');
 }
 
-function login(login_url) { // loginForm is submitted
+function login(login_url, client_ip) { // loginForm is submitted
     var username = document.getElementById('userid').value; // get username
     var results = false;
     resetLogin();
@@ -135,6 +134,7 @@ function login(login_url) { // loginForm is submitted
           } // if
           else { // login was successful
             createCookie('username', username);
+            createCookie('clientip', client_ip);
             results = true;
             //return checkMACAddress();
           } //else
@@ -153,10 +153,12 @@ function login(login_url) { // loginForm is submitted
     return results;
 };
 
-function loadTemplate(template_url, property_url) { // template is submitted
+function loadTemplate(template_url, property_url, ap_eth_mac, ap_radio_mac) { // template is submitted
     var property = document.getElementById('property').value; // get property
-    $('div#template_err').removeClass("error");
-    $('div#template_err').fadeOut();
+    $('div#template_msg').removeClass("error");
+    $('div#template_msg').fadeOut();
+    var ap_info = {eth_mac:ap_eth_mac,radio_mac:ap_radio_mac};
+    createCookie("ap_info", JSON.stringify(ap_info));
     if (property) {
         $.ajax({
             type: "GET",
@@ -168,20 +170,20 @@ function loadTemplate(template_url, property_url) { // template is submitted
             data: "property=" + property,
             // script call was *not* successful
             error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                $('div#template_err').text("responseText: " + XMLHttpRequest.responseText 
+                $('div#template_msg').text("responseText: " + XMLHttpRequest.responseText 
                 + ", textStatus: " + textStatus 
                 + ", errorThrown: " + errorThrown);
-                $('div#template_err').addClass("error");
-                $('div#template_err').fadeIn();
+                $('div#template_msg').addClass("error");
+                $('div#template_msg').fadeIn();
             }, // error 
             // script call was successful 
             // data contains the JSON values returned by the Perl script 
             success: function(data){
                 if (data.error) { // script returned error
-                    $('div#template_err').text("Error: " + data.error 
+                    $('div#template_msg').text("Error: " + data.error 
                         + "<br> Please contact Web Admin by email <a href=\"mailto:yinche\@cisco.com?Subject=APVT%20Support\" target=\"_top\">Send Mail</a><br>");
-                    $('div#template_err').addClass("error");
-                    $('div#template_err').fadeIn();
+                    $('div#template_msg').addClass("error");
+                    $('div#template_msg').fadeIn();
                 } 
                 else {
                     var template_fields = data.fields;
@@ -195,7 +197,8 @@ function loadTemplate(template_url, property_url) { // template is submitted
                         $('#template_table tr:last').after("<tr class='template_field'> <td> <label for='property'>" + template_fields_array[i] + "</label> </td> <td> <input class=\"template_input\" type=\"text\" name=\"" + template_fields_array[i].toLowerCase() + "_" + input_type_array[i].toLowerCase() + "\" size=\"" + fields_limits_array[i] + "\" maxlength=\"" + fields_limits_array[i] + "\" id=\"" + template_fields_array[i].toLowerCase() + "\" /> </td> </tr>");
 
                     }
-                    $('#template_table tr:last').after("<tr class='template_field'> <td> <button action=\"action\" value=\"Back\" onclick=\"inputValidation(\'" + property_url + "');\">Next</button> </td></tr>");
+                    $('#template_table tr:last').after("<tr class='template_field'> <td> <button action=\"action\" value=\"Back\" onclick=\"inputValidation(\'" + property_url + "');\">Next</button> </td> <td></td><td><button onclick=\"history.go(-1);\">Back</button></td></tr>");
+
                     $('#template_fieldset').css( "background-color", data.color);
               } 
             },
@@ -204,8 +207,8 @@ function loadTemplate(template_url, property_url) { // template is submitted
 };
 
 function inputValidation(property_url) {
-    $('div#template_err').removeClass("error");
-    $('div#template_err').fadeOut();
+    $('div#template_msg').removeClass("error");
+    $('div#template_msg').fadeOut();
     $('.err_msg').remove();
     $(".clr_red").removeClass("clr_red");
     var provisioning_ap_name;
@@ -220,9 +223,9 @@ function inputValidation(property_url) {
                 if (string_building.test(fieldList[i].name)) { }
             } else {
                 $("input[name=" + fieldList[i].name + "]").addClass("clr_red");
-                $('div#template_err').append("<p> <err class='err_msg'> Error: Only Digit is allowed in " + fieldList[i].id.capitalize() + "</err></p>");
-                $('div#template_err').addClass("error");
-                $('div#template_err').fadeIn();
+                $('div#template_msg').append("<p> <err class='err_msg'> Error: Only Digit is allowed in " + fieldList[i].id.capitalize() + "</err></p>");
+                $('div#template_msg').addClass("error");
+                $('div#template_msg').fadeIn();
             }
         } else if (fieldList[i].name.indexOf("_t") >= 0) {
             var input_text=/^[\s\S]{0,32}$/;
@@ -230,9 +233,9 @@ function inputValidation(property_url) {
                 // alert(fieldList[i].name + ":" + fieldList[i].value);
             } else {
                 $("input[name=" + fieldList[i].name + "]").addClass("clr_red");
-                $('div#template_err').append("<p> <err class='err_msg'> Error: Char is allowed in" + fieldList[i].id.capitalize() + "</err></p>");
-                $('div#template_err').addClass("error");
-                $('div#template_err').fadeIn();
+                $('div#template_msg').append("<p> <err class='err_msg'> Error: Char is allowed in" + fieldList[i].id.capitalize() + "</err></p>");
+                $('div#template_msg').addClass("error");
+                $('div#template_msg').fadeIn();
             }
         } 
         //alert(fieldList[i].name + ":" + fieldList[i].size);
@@ -248,24 +251,23 @@ function inputValidation(property_url) {
             data: "property=" + property,
             // script call was *not* successful
             error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                $('div#template_err').text("responseText: " + XMLHttpRequest.responseText 
+                $('div#template_msg').text("responseText: " + XMLHttpRequest.responseText 
                 + ", textStatus: " + textStatus 
                 + ", errorThrown: " + errorThrown);
-                $('div#template_err').addClass("error");
-                $('div#template_err').fadeIn();
+                $('div#template_msg').addClass("error");
+                $('div#template_msg').fadeIn();
             }, // error 
             // script call was successful 
             // data contains the JSON values returned by the Perl script 
             success: function(data){
-
                 if (data.error) { // script returned error
-                    $('div#template_err').text("Error: " + data.error 
+                    $('div#template_msg').text("Error: " + data.error 
                         + "<br> Please contact Web Admin by email <a href=\"mailto:yinche\@cisco.com?Subject=APVT%20Support\" target=\"_top\">Send Mail</a><br>");
-                    $('div#template_err').addClass("error");
-                    $('div#template_err').fadeIn();
+                    $('div#template_msg').addClass("error");
+                    $('div#template_msg').fadeIn();
                 } 
-                else {
-                    var provisioning_ap_name_location = "B" + document.getElementById('building').value  + "F" + document.getElementById('floor').value + document.getElementById('location').value;;
+                else { 
+                    var provisioning_ap_name_location = "B" + document.getElementById('building').value  + "F" + document.getElementById('floor').value + document.getElementById('location').value.toUpperCase();
                     var provisioning_ap_name;
                     if (/^public$/.test(data.property)){
                         
@@ -274,13 +276,16 @@ function inputValidation(property_url) {
                         provisioning_ap_name = data.service_code + "-" +provisioning_ap_name_location + "-" + data.property + "-" + data.division;
                     }
                     
-                    $('#provisioning-apname').text(provisioning_ap_name);
-                    // $('#provisioning-primary-controller_name').text(data.primary_controller_name);
-                    $('#provisioning-primary-controller-ip').text(data.primary_controller_ip);
-                    // $('#provisioning-secondary-controller_name').text(data.secondary_controller_ip);
-                    $('#provisioning-secondary-controller-ip').text(data.secondary_controller_ip);
-                    $('#provisioning-location').text(document.getElementById('location').value);
-                    $('#provisioning-apgroup').text(data.ap_group);
+                    $('#provisioning_apname').text(provisioning_ap_name);
+                    // $('#provisioning_primary_controller_name').text(data.primary_controller_name);
+                    $('#provisioning_primary_controller_name').text(data.primary_controller_name);
+                    // $('#provisioning_secondary_controller_name').text(data.secondary_controller_ip);
+                    $('#provisioning_secondary_controller_name').text(data.secondary_controller_name);
+                    $('#provisioning_location').text(document.getElementById('location').value.capitalize());
+                    $('#provisioning_apgroup').text(data.ap_group);
+                    data.provisioning_name = provisioning_ap_name;
+                    data.provisioning_location = document.getElementById('location').value;
+                    createCookie("provisioning_info", JSON.stringify(data));
                 }
             },
         });   
@@ -290,29 +295,38 @@ function inputValidation(property_url) {
 }
 
 function submitChange(submitchange_url) {
-$.ajax({
+    var provisioning_info = JSON.parse(readCookie("provisioning_info"));
+    var ap_info = JSON.parse(readCookie("ap_info"));
+    var client_ip = readCookie("client_ip");
+    $.ajax({
         type: "GET",
-        url: property_url, // URL of the Perl script
+        url: submitchange_url, // URL of the Perl script
         contentType: "application/json; charset=utf-8",
         async: false,
         dataType: "json",
         // send property as parameters to the Perl script
-        data: "provisioning-apname=" + document.getElementById('provisioning-apname') +"&provisioning-primary-controller-ip=" + document.getElementById('provisioning-primary-controller-ip') +"&provisioning-secondary-controller-ip=" + document.getElementById('provisioning-secondary-controller-ip') +"&provisioning-location=" + document.getElementById('provisioning-location').value + "&provisioning-apgroup=" + document.getElementById('provisioning-apgroup'),
+        data: "ap_name=" + provisioning_info.provisioning_name + "&ap_radio_mac=" + ap_info.radio_mac + "&primary_controller_name=" + provisioning_info.primary_controller_name + "&primary_controller_ip=" + provisioning_info.primary_controller_ip + "&secondary_controller_name=" + provisioning_info.secondary_controller_name + "&secondary_controller_ip=" + provisioning_info.secondary_controller_ip + "&ap_location=" + provisioning_info.provisioning_location + "&ap_group=" + provisioning_info.ap_group,
         // script call was *not* successful
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
-            $('div#template_err').text("responseText: " + XMLHttpRequest.responseText 
+            $('div#template_msg').text("responseText: " + XMLHttpRequest.responseText 
             + ", textStatus: " + textStatus 
             + ", errorThrown: " + errorThrown);
-            $('div#template_err').addClass("error");
-            $('div#template_err').fadeIn();
+            $('div#template_msg').addClass("error");
+            $('div#template_msg').fadeIn();
         }, // error 
         // script call was successful 
         // data contains the JSON values returned by the Perl script 
         success: function(data){
             if(!data.err){
-                alert("passed");
+                $('#comfirm_table').fadeOut();
+                $('div#template_msg').text("AP should be rebooted in few minutes and broadcasting production SSID");
+                $('div#template_msg').removeClass("error");
+                $('div#template_msg').fadeIn();
             } else {
-                alert("failed");
+                $('div#template_msg').text("");
+                $('div#template_msg').removeClass("error");
+                $('div#template_msg').fadeIn();
+                alert("failed" + data.name);
             } 
         }
     });
@@ -325,8 +339,33 @@ function createCookie(name, value) {
    document.cookie = name+"="+value+expires+"; path=/";
 }
 
+function logout(url){
+    var cookies = document.cookie.split(";");
+    for (var i = 0; i < cookies.length; i++){   
+        var spcook =  cookies[i].split("=");
+        document.cookie = spcook[0] + "=; Path=/; expires=Thu, 21 Sep 1970 00:00:01 UTC;";
+    }
+    window.location.href = url;
+}
+
 function removeCookie(name){
     document.cookie = name + '=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function backPrvisionForm(){
+    $('#comfirm_table').fadeOut();
+    $('#template_table').fadeIn();
 }
 
 String.prototype.capitalize = function() {

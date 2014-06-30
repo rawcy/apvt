@@ -9,6 +9,7 @@
 
 use CGI qw(:standard);
 use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use CGI::Cookie;
 use CGI::Session;
 use strict;
 use FileHandle;
@@ -43,13 +44,13 @@ print $session->header();
 
 print start_html(-title => "Cisco APPT",
                  -script=> [{   -type   => 'text/javascript',
-                                -src    => '/javascript/appt.js'    
+                                -src    => '/cgi-bin/javascript/appt.js'    
                             },
                             {   -type   => 'text/javascript',
-                                -src    => '/javascript/jquery.jeditable.js'
+                                -src    => '/cgi-bin/javascript/jquery.jeditable.js'
                             },
                             {   -type   => 'text/javascript',
-                                -src    => '/javascript/jquery-1.10.2.min.js'
+                                -src    => '/cgi-bin/javascript/jquery-1.10.2.min.js'
                             }],
                  -style=>{-src=>['/cgi-bin/css/appt.css']});
 require "header.cgi";
@@ -67,12 +68,13 @@ EndHTML
     # print "username: $username";
     # $session->param('client_ip' => $client_ip);
     print "<div id='loginResult' style='display:none;'> </div>";
-    print start_form(-id => 'loginForm', -method=>'POST', -action=>"http://$host/cgi-bin/$script_name", -onSubmit=>"javascript:return login('/cgi-bin/$login')"), "<br>",
+    print start_form(-id => 'loginForm', -method=>'POST', -action=>"http://$host/cgi-bin/$script_name", -onSubmit=>"javascript:return login('/cgi-bin/$login', '$client_ip')"), "<br>",
         "<fieldset> <legend>Login</legend>  
         <div id='username'> <p> <label for='username'>Username</label> </p> </div> <p>", 
         textfield( -name => 'userid', -id => 'userid', -size => 20, -maxlength => 20), "</p>",
         "<p>", submit(-name=>'sub_form', -value=>'Login'), "</p>", "</fieldset>", end_form, "</div>";
 } else {
+   
     my $ap_mac;
     my $search_ap = "$perl $searchAp $client_ip";
     if (param('ap_mac') ne "FF:FF:FF:FF:FF:FF") {
@@ -83,6 +85,8 @@ EndHTML
     }
     my $result = `$search_ap`;
     my ($error, $result_data) = split(";", $result, 2);
+    print "<div class=\"loginbar\"><div class=\"logout light\" onclick=\"logout('http://$host/cgi-bin/$script_name');\">logout: $username</div></div>";
+
     if ($error) {
         print <<EndHTML;
         <div class="content_inner_section">
@@ -102,10 +106,10 @@ EndHTML
         submit(-name=>'sub_form', -value=>'Start Provisioning'), "</p>", "</fieldset>", end_form, "</div>";  
         print <<EndHTML;
                 </div>
-            <button action="action" value="Back" onclick="removeCookie('username');">Back</button> 
 EndHTML
     } else {
         my @staging_ap_info = split(',', $result_data, 8);
+
         $ap_mac = param('ap_mac');
         $session->param('ap_mac' => $ap_mac);
         my $conf_dir = "$FindBin::Bin/conf";
@@ -118,7 +122,6 @@ EndHTML
             push(@property_menu,$data[0]);
         }
         @property_menu = sort { lc($a) cmp lc($b) } @property_menu;
-
         print <<EndHTML;
         <script>
             \$(document).ready(function() {
@@ -135,11 +138,11 @@ EndHTML
                         <td> <label for='property'>Property</label> </td>
                         <td>
 EndHTML
-        print popup_menu( -name => 'property', -id => 'property', -value =>\@property_menu, -onchange=>"loadTemplate('/cgi-bin/$getTemplate', '/cgi-bin/$getProperty')" );
+        print popup_menu( -name => 'property', -id => 'property', -value =>\@property_menu, -onchange=>"loadTemplate('/cgi-bin/$getTemplate', '/cgi-bin/$getProperty', '$staging_ap_info[1]', '$staging_ap_info[2]')");
         print <<EndHTML;
             </td>
             </tr>
-            <div id='template_err' style='display:none;'> </div>
+            <div id='template_msg' style='display:none;'> </div>
         </table>
         <table id='comfirm_table' style='display:none;'>
                 <caption> Comfirm Informarion </caption>
@@ -151,33 +154,36 @@ EndHTML
             <tr>
                 <td>AP Name</td>
                 <td>$staging_ap_info[0]</td>
-                <td id='provisioning-apname'></td>
+                <td id='provisioning_apname'></td>
             </tr>
             <tr>
-                <td>Prime Controller IP</td>
+                <td>Prime Controller Name</td>
                 <td>$staging_ap_info[4]</td>
-                <td id='provisioning-primary-controller-ip'></td>
+                <td id='provisioning_primary_controller_name'></td>
             </tr>
             <tr>
-                <td>Secondary Controller IP</td>
+                <td>Secondary Controller Name</td>
                 <td>$staging_ap_info[5]</td>
-                <td id='provisioning-secondary-controller-ip'></td>
+                <td id='provisioning_secondary_controller_name'></td>
             </tr>
             <tr>
                 <td>Location</td>
                 <td>$staging_ap_info[6]</td>
-                <td id='provisioning-location'></td>
+                <td id='provisioning_location'></td>
             </tr>
             <tr>
                 <td>AP Group</td>
                 <td>$staging_ap_info[7]</td>
-                <td id='provisioning-apgroup'></td>
+                <td id='provisioning_apgroup'></td>
             </tr>
-            <tr>
-                <td><button action="action" value="Back"
+            <tr>   
 EndHTML
-            print "onclick=\"submitChange('$provisionSubmitation');\">Submit</button></td>";
+            print "<td><button onclick=\"submitChange('$provisionSubmitation');\">Submit</button></td>";
             print <<EndHTML
+                <td></td>
+                <td>
+                <button onclick=\"backPrvisionForm();\">Back</button>
+                </td>
             </tr>
         </table>
         </fieldset></div>

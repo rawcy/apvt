@@ -5,22 +5,31 @@ use strict;
 use warnings;
 use FindBin;
 
+require "$FindBin::Bin/conf/apptweb.conf";
+
+use vars qw ($perl $updateApconfig $rebootAp);
 # read the CGI params
 my $cgi = CGI->new;
-my $apName = $cgi->param("provisioning-apname");
-my $primary-controller-ip = $cgi->param("provisioning-primary-controller-ip");
-my $secondary-controller-ip = $cgi->param("provisioning-secondary-controller-ip");
-my $apLocation = $cgi->param("provisioning-location");
-my $apGroup = $cgi->param("provisioning-apgroup");
+my $apName = $cgi->param("ap_name");
+my $apRadioMac = $cgi->param("ap_radio_mac");
+my $primaryControllerName = $cgi->param("primary_controller_name");
+my $primaryControllerIp = $cgi->param("primary_controller_ip");
+my $secondaryControllerName =$cgi->param("secondary_controller_name");
+my $secondaryControllerIp = $cgi->param("secondary_controller_ip");
+my $apLocation = $cgi->param("ap_location");
+my $apGroup = $cgi->param("ap_group");
 
 my $json = "";
-if(1){
-    $json = qq{{"results" : "passed", "name" : "$apName", "pip" : "$primary-controller-ip",
-                "sip" : "$$secondary-controller-ip", "location" : "$apLocation", "apgroup" : "$apGroup"}};
+my $cmd_string = "$perl $updateApconfig $apName $apRadioMac $primaryControllerName $primaryControllerIp $apLocation $apGroup";
+if ($secondaryControllerName){
+    $cmd_string .= " $secondaryControllerName $secondaryControllerIp"; 
+}
+my $resultPushSettingToAp = `$cmd_string`;
+my $string = quotemeta "Failed object";
+if($resultPushSettingToAp =~ /$string/){
+    $json = qq{{"err" : "$cmd_string"}};
 } else {
-    $json = qq{{"results" : "failed", "name" : "$apName", "pip" : "$primary-controller-ip",
-                "sip" : "$$secondary-controller-ip", "location" : "$apLocation", "apgroup" : "$apGroup"}};
-
+    $json = qq{{"results" : "$cmd_string"}};
 }
 
 print $cgi->header(-type => "application/json", -charset => "utf-8");

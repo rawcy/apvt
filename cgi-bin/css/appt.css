@@ -88,7 +88,49 @@ input[type=submit], button {
     -o-transition: 0s;
     cursor: pointer; 
 }
+.loginbar{
+    border: 0 none;
+    border-radius: 2px 2px 2px 2px;
+    color: #FFFFFF;
+    width: auto;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 10px;
 
+    background: none repeat scroll 0 0 #999999;
+    color: white;
+}
+.logout{
+    border: 0 none;
+    border-radius: 2px 2px 2px 2px;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Arial,sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 20px;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding: 0px 0px;
+    text-transform: none;
+    transition: all 0.3s ease 0s;
+    -moz-transition: all 0.3s ease 0s;
+    -webkit-transition: all 0.3s ease 0s;
+    width: 16.795%;
+    /* auto */
+    text-align: center;
+    /* DELETE WHEN WIDTH AUTO */
+}
+
+.logout.light {
+  background: none repeat scroll 0 0 #999999;
+  color: white;
+}
+.logout.light:hover {
+  background: none repeat scroll 0 0 #444444;
+  color: white;
+}
 
 input[type=submit]:hover, button:hover {
    background: none;

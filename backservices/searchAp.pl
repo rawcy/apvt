@@ -20,14 +20,11 @@ require "$FindBin::Bin/lib/common_snmp.pl";
 
 BEGIN { our $start_run = time(); }
 
-my ($host, $client_ip, $AP_MAC_dec, $preset, $community, $ERR);
+my ($host, $client_ip, $AP_MAC_dec, $community, $ERR);
 if (@ARGV >= 1) {
     $client_ip = $ARGV[0];
     if (@ARGV >=2 ) {
         $AP_MAC_dec = $ARGV[1];
-    }
-    if (@ARGV >=3 ) {
-        $preset = $ARGV[2];
     }
 } else {
     print "ERROR: no argument passed";
@@ -41,22 +38,10 @@ if (! -r "$FindBin::Bin/conf/appt.conf") {
 # global variables
 
 require "$FindBin::Bin/conf/apvt.conf";
-use vars qw ($gatingWLC $gatingWLC_s $gatingCommunity %csv_file $perl);
-if(defined $preset){
-    $host=$csv_file{$preset}{'p_wlc'};
-    $community=$csv_file{$preset}{'community'};
-} else {
-    if($client_ip =~ /[0-9]{2}\.[0-9]{2}\.97\.[0-9]{2}/) {
-        $host = $gatingWLC;
-    } elsif ($client_ip =~ /[0-9]{2}\.[0-9]{2}\.98\.[0-9]{2}/) {
-        $host = $gatingWLC_s;
-    } else {
-        $host = $gatingWLC;
-    }
-    $community = $gatingCommunity;
-}
+use vars qw ($gatingWLC $gatingCommunity %csv_file $perl);
+
 #mac_hex_decimal($client_mac_hex);
-my ($error_msg, $ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = search_client($host, $community, $client_ip, $AP_MAC_dec);
+my ($error_msg, $ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = search_client($gatingWLC, $gatingCommunity, $client_ip, $AP_MAC_dec);
 print "$error_msg;$ap_name,$ap_eth_hex,$ap_rf_hex,$ap_ip,$p_wlc,$s_wlc,$location,$ap_grp";
 
 sub search_client {
@@ -114,12 +99,12 @@ sub search_client {
         if ($target_mac_dec){
             my $ap_info = $session->get_request(-varbindlist => [ "$OID_grp_bsnApIpAddress.$target_mac_dec", "$bsnAPEthernetMacAddress.$target_mac_dec", 
                 "$bsnAPName.$target_mac_dec", "$bsnAPLocation.$target_mac_dec", "$bsnAPDot3MacAddress.$target_mac_dec",
-                "$cLApPrimaryControllerAddress.$target_mac_dec", "$cLApSecondaryControllerAddress.$target_mac_dec", "$bsnAPGroupVlanName.$target_mac_dec"] );
+                "$bsnAPPrimaryMwarName.$target_mac_dec", "$bsnAPSecondaryMwarName.$target_mac_dec", "$bsnAPGroupVlanName.$target_mac_dec"] );
             $ap_name = $$ap_info{"$bsnAPName.$target_mac_dec"};
             $ap_ip = $$ap_info{"$OID_grp_bsnApIpAddress.$target_mac_dec"};
             $ap_eth_hex = format_mac_hex($$ap_info{"$bsnAPEthernetMacAddress.$target_mac_dec"});
-            $p_wlc = ip_hex_decimal(format_ip_hex($$ap_info{"$cLApPrimaryControllerAddress.$target_mac_dec"}));
-            $s_wlc = ip_hex_decimal(format_ip_hex($$ap_info{"$cLApSecondaryControllerAddress.$target_mac_dec"}));
+            $p_wlc = $$ap_info{"$bsnAPPrimaryMwarName.$target_mac_dec"};
+            $s_wlc = $$ap_info{"$bsnAPSecondaryMwarName.$target_mac_dec"};
             $location = $$ap_info{"$bsnAPLocation.$target_mac_dec"};
             $ap_rf_hex = format_mac_hex($$ap_info{"$bsnAPDot3MacAddress.$target_mac_dec"});   
             $ap_grp = $$ap_info{"$bsnAPGroupVlanName.$target_mac_dec"};  
