@@ -16,7 +16,7 @@ use lib "$FindBin::Bin/lib";
 use OIDS;
 use Data::Dumper;
 
-my ($ap_name, $ap_location, $ap_rf_hex, $primary_controller_name, $primary_controller_ip, $secondary_controller_name, $secondary_controller_ip, $ap_group);
+my ($ap_name, $ap_location, $ap_rf_hex, $primary_controller_name, $primary_controller_ip, $secondary_controller_name, $secondary_controller_ip, $ap_group, $cmd_string);
 if (@ARGV >= 6) {
     $ap_name = $ARGV[0];
 	$ap_rf_hex = $ARGV[1];
@@ -33,6 +33,10 @@ if (@ARGV >= 6) {
 	exit 1;
 }
 
+if (!$secondary_controller_name){
+    $secondary_controller_name = "''";
+    $secondary_controller_ip = "''";
+}
 # my $start = Time::HiRes::gettimeofday();
 require "$FindBin::Bin/lib/common_snmp.pl";
 require "$FindBin::Bin/conf/appt.conf";

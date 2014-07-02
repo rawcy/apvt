@@ -20,11 +20,15 @@ require "$FindBin::Bin/lib/common_snmp.pl";
 
 BEGIN { our $start_run = time(); }
 
-my ($host, $client_ip, $AP_MAC_dec, $community, $ERR);
+my ($host, $community, $client_ip, $AP_MAC_dec, $community, $ERR, $controller_ip, $controller_community);
 if (@ARGV >= 1) {
     $client_ip = $ARGV[0];
     if (@ARGV >=2 ) {
         $AP_MAC_dec = $ARGV[1];
+    }
+    if (@ARGV >=4) {
+        $controller_ip = $ARGV[2];
+        $controller_community = $ARGV[3];
     }
 } else {
     print "ERROR: no argument passed";
@@ -37,11 +41,19 @@ if (! -r "$FindBin::Bin/conf/appt.conf") {
 }
 # global variables
 
-require "$FindBin::Bin/conf/apvt.conf";
+require "$FindBin::Bin/conf/appt.conf";
 use vars qw ($gatingWLC $gatingCommunity %csv_file $perl);
 
+if ($controller_ip) {
+    $host = $gatingWLC;
+    $community = $gatingCommunity;
+} else {
+    $host = controller_ip;
+    $community = $controller_community;
+}
+
 #mac_hex_decimal($client_mac_hex);
-my ($error_msg, $ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = search_client($gatingWLC, $gatingCommunity, $client_ip, $AP_MAC_dec);
+my ($error_msg, $ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = search_client($host, $community, $client_ip, $AP_MAC_dec);
 print "$error_msg;$ap_name,$ap_eth_hex,$ap_rf_hex,$ap_ip,$p_wlc,$s_wlc,$location,$ap_grp";
 
 sub search_client {

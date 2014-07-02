@@ -213,6 +213,7 @@ function inputValidation(property_url) {
     $(".clr_red").removeClass("clr_red");
     var provisioning_ap_name;
     var fieldList = document.querySelectorAll(".template_input");
+    var property = document.getElementById('property').value; // get property
     for (var i = 0, length = fieldList.length; i < length; i++) {
         var string_building=/^building$/;
         var string_floor=/^floor$/;
@@ -281,10 +282,10 @@ function inputValidation(property_url) {
                     $('#provisioning_primary_controller_name').text(data.primary_controller_name);
                     // $('#provisioning_secondary_controller_name').text(data.secondary_controller_ip);
                     $('#provisioning_secondary_controller_name').text(data.secondary_controller_name);
-                    $('#provisioning_location').text(document.getElementById('location').value.capitalize());
+                    $('#provisioning_location').text(document.getElementById('other').value.capitalize());
                     $('#provisioning_apgroup').text(data.ap_group);
                     data.provisioning_name = provisioning_ap_name;
-                    data.provisioning_location = document.getElementById('location').value;
+                    data.provisioning_location = document.getElementById('other').value;
                     createCookie("provisioning_info", JSON.stringify(data));
                 }
             },
@@ -294,7 +295,7 @@ function inputValidation(property_url) {
     } 
 }
 
-function submitChange(submitchange_url) {
+function submitChange(submitchange_url, validation_url) {
     var provisioning_info = JSON.parse(readCookie("provisioning_info"));
     var ap_info = JSON.parse(readCookie("ap_info"));
     var client_ip = readCookie("client_ip");
@@ -305,7 +306,7 @@ function submitChange(submitchange_url) {
         async: false,
         dataType: "json",
         // send property as parameters to the Perl script
-        data: "ap_name=" + provisioning_info.provisioning_name + "&ap_radio_mac=" + ap_info.radio_mac + "&primary_controller_name=" + provisioning_info.primary_controller_name + "&primary_controller_ip=" + provisioning_info.primary_controller_ip + "&secondary_controller_name=" + provisioning_info.secondary_controller_name + "&secondary_controller_ip=" + provisioning_info.secondary_controller_ip + "&ap_location=" + provisioning_info.provisioning_location + "&ap_group=" + provisioning_info.ap_group,
+        data: "ap_name=" + provisioning_info.provisioning_name + "&ap_radio_mac=" + ap_info.radio_mac + "&primary_controller_name=" + provisioning_info.primary_controller_name + "&primary_controller_ip=" + provisioning_info.primary_controller_ip + "&secondary_controller_name=" + provisioning_info.secondary_controller_name + "&secondary_controller_ip=" + provisioning_info.secondary_controller_ip"&ap_group=" + provisioning_info.ap_group  + "&ap_location=\"" + provisioning_info.provisioning_location + "\"",
         // script call was *not* successful
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             $('div#template_msg').text("responseText: " + XMLHttpRequest.responseText 
@@ -319,12 +320,53 @@ function submitChange(submitchange_url) {
         success: function(data){
             if(!data.err){
                 $('#comfirm_table').fadeOut();
-                $('div#template_msg').text("AP should be rebooted in few minutes and broadcasting production SSID");
+                $('div#template_msg').text("<p>AP should be rebooted in few minutes and broadcasting production SSID<p> <button onclick=\"validation('validation_url', 'ap_info.eth_mac', 'provisioning_info.primary_controller_ip');\">Submit</button> ");
                 $('div#template_msg').removeClass("error");
+                $(".clr_red").removeClass("clr_red");
                 $('div#template_msg').fadeIn();
             } else {
                 $('div#template_msg').text("");
                 $('div#template_msg').removeClass("error");
+                $(".clr_red").removeClass("clr_red");
+                $('div#template_msg').fadeIn();
+                alert("failed" + data.name);
+            } 
+        }
+    });
+}
+
+function validation(validation_url, ap_eth_mac, controller_ip) {
+    var client_ip = readCookie('clientip')
+    var provisioning_info = JSON.parse(readCookie("provisioning_info"));
+    .ajax({
+        type: "GET",
+        url: validation_url, // URL of the Perl script
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        dataType: "json",
+        // send property as parameters to the Perl script
+        data: "ap_eth_mac=" + ap_eth_mac + "&controller_ip" + controller_ip + "&client_ip" + client_ip;
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            $('div#template_msg').text("responseText: " + XMLHttpRequest.responseText 
+            + ", textStatus: " + textStatus 
+            + ", errorThrown: " + errorThrown);
+            $('div#template_msg').addClass("error");
+            $('div#template_msg').fadeIn();
+        }, // error
+        success: function(data){
+            if(!data.err){
+                if ((provisioning_info.primary_controller_ip == data.primary_controller_ip) && provisioning_info.provisioning_name == data.apname) && provisioning_info.provisioning_location == data.aplocation) && provisioning_info.ap_group == data.ap_group)){
+                    $('#comfirm_table').fadeOut();
+                    $('div#template_msg').text("<p>AP provissioned correctly<p> <button onclick=\"logout('document.URL');\">logout</button> ");
+                    $('div#template_msg').removeClass("error");
+                    $(".clr_red").removeClass("clr_red");
+                    $('div#template_msg').fadeIn();
+                }
+                
+            } else {
+                $('div#template_msg').text("");
+                $('div#template_msg').removeClass("error");
+                $(".clr_red").removeClass("clr_red");
                 $('div#template_msg').fadeIn();
                 alert("failed" + data.name);
             } 

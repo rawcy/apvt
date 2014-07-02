@@ -39,20 +39,20 @@ my $dd = "$d$d";
 
 my $username = CGI->cookie('username') || '';
 CGI::Session->name("appt");
-my $session = new CGI::Session(undef, undef, {Directory=>'/session_logs'}) or die CGI::Session->errstr;
+my $session = new CGI::Session(undef, undef, {Directory=>'$log_path'}) or die CGI::Session->errstr;
 print $session->header();
 
 print start_html(-title => "Cisco APPT",
                  -script=> [{   -type   => 'text/javascript',
-                                -src    => '/cgi-bin/javascript/appt.js'    
+                                -src    => '/cgi-bin/appt/javascript/appt.js'    
                             },
                             {   -type   => 'text/javascript',
-                                -src    => '/cgi-bin/javascript/jquery.jeditable.js'
+                                -src    => '/cgi-bin/appt/javascript/jquery.jeditable.js'
                             },
                             {   -type   => 'text/javascript',
-                                -src    => '/cgi-bin/javascript/jquery-1.10.2.min.js'
+                                -src    => '/cgi-bin/appt/javascript/jquery-1.10.2.min.js'
                             }],
-                 -style=>{-src=>['/cgi-bin/css/appt.css']});
+                 -style=>{-src=>['/cgi-bin/appt/css/appt.css']});
 require "header.cgi";
 
 if(!$username){
@@ -174,6 +174,48 @@ EndHTML
             <tr>
                 <td>AP Group</td>
                 <td>$staging_ap_info[7]</td>
+                <td id='provisioning_apgroup'></td>
+            </tr>
+            <tr>   
+EndHTML
+            print "<td><button onclick=\"submitChange('$provisionSubmitation');\">Submit</button></td>";
+            print <<EndHTML
+                <td></td>
+                <td>
+                <button onclick=\"backPrvisionForm();\">Back</button>
+                </td>
+            </tr>
+        </table>
+        <table id='validate_table' style='display:none;'>
+                <caption> Validated Informarion </caption>
+            <tr>
+                <td></td>
+                <td>Current Settings</td>
+                <td>Provisioning Settings</td>
+            </tr>
+            <tr>
+                <td>AP Name</td>
+                <td id='validate_apname'></td>
+                <td id='provisioning_apname'></td>
+            </tr>
+            <tr>
+                <td>Prime Controller Name</td>
+                <td id='validate_primary_controller_name'></td>
+                <td id='provisioning_primary_controller_name'></td>
+            </tr>
+            <tr>
+                <td>Secondary Controller Name</td>
+                <td id='validate_secondary_controller_name'></td>
+                <td id='provisioning_secondary_controller_name'></td>
+            </tr>
+            <tr>
+                <td>Location</td>
+                <td id='validate_location'></td>
+                <td id='provisioning_location'></td>
+            </tr>
+            <tr>
+                <td>AP Group</td>
+                <td id='validate_apgroup'></td>
                 <td id='provisioning_apgroup'></td>
             </tr>
             <tr>   
