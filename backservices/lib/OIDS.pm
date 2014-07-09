@@ -12,13 +12,13 @@ use strict;
 use warnings;
 use Exporter;
 our @ISA = 'Exporter';
-our @EXPORT = qw($cLApPrimaryControllerAddress $cLApSecondaryControllerAddress $bsnAPLocation $bsnAPReset $cLApIfMacAddress $bsnAPGroupVlanName $bsnAPGroupsVlanName $bsnAPPrimaryMwarName $bsnAPSecondaryMwarName
-				$bsnAPEntry $bsnAPOperationStatus $bsnAPName $bsnMobileStationMacAddress $bsnAPEthernetMacAddress $bsnAPDot3MacAddress
-				$OID_sysUpTime $OID_agentCurrentCPUUtilization $OID_agentFreeMemory $OID_bsnAPStatsTimer $OID_cisco_product
-				$OID_bsnAPNumOfSlot $OID_grp_bsnMobileStationIpAddress $OID_grp_bsnMobileStationAPIfSlotId
-				$OID_grp_bsnMobileStationAPMacAddr  $OID_grp_bsnApIpAddress $OID_grp_bsnMobileStationStatus $OID_grp_bsnMobileStationStatsEntry
-				$OID_grp_bsnAPIfLoadParametersEntry $OID_grp_bsnAPIfLoadParametersEntry $OID_grp_bsnAPIfChannelInterferenceInfoEntry
-				$OID_grp_bsnAPIfPhyChannelNumber $OID_grp_bsnAPIfChannelNoiseInfoEntry %Numeric_Oid_arr %interested_oid);
+our @EXPORT = qw($cLApLEDState $cLApPrimaryControllerAddress $cLApSecondaryControllerAddress $bsnAPLocation $bsnAPReset $cLApIfMacAddress $bsnAPGroupVlanName $bsnAPGroupsVlanName $bsnAPPrimaryMwarName $bsnAPSecondaryMwarName
+                $bsnAPEntry $bsnAPOperationStatus $bsnAPName $bsnMobileStationMacAddress $bsnAPEthernetMacAddress $bsnAPDot3MacAddress
+                $OID_sysUpTime $OID_agentCurrentCPUUtilization $OID_agentFreeMemory $OID_bsnAPStatsTimer $OID_cisco_product
+                $OID_bsnAPNumOfSlot $OID_grp_bsnMobileStationIpAddress $OID_grp_bsnMobileStationAPIfSlotId
+                $OID_grp_bsnMobileStationAPMacAddr  $OID_grp_bsnApIpAddress $OID_grp_bsnMobileStationStatus $OID_grp_bsnMobileStationStatsEntry
+                $OID_grp_bsnAPIfLoadParametersEntry $OID_grp_bsnAPIfLoadParametersEntry $OID_grp_bsnAPIfChannelInterferenceInfoEntry
+                $OID_grp_bsnAPIfPhyChannelNumber $OID_grp_bsnAPIfChannelNoiseInfoEntry %Numeric_Oid_arr %interested_oid);
 
 # FOR APVT
 
@@ -37,6 +37,7 @@ our $bsnAPGroupVlanName = '.1.3.6.1.4.1.14179.2.2.1.1.30';
 our $bsnAPEthernetMacAddress  = '.1.3.6.1.4.1.14179.2.2.1.1.33';
 our $cLApIfMacAddress = '.1.3.6.1.4.1.9.9.513.1.1.1.1.2';
 our $bsnMobileStationMacAddress = '.1.3.6.1.4.1.14179.2.1.4.1.1';
+our $cLApLEDState = '.1.3.6.1.4.1.9.9.513.1.1.1.1.46';
 # interested MIBs Infomation
 our $OID_sysUpTime = '.1.3.6.1.2.1.1.3.0';
 our $OID_agentCurrentCPUUtilization ='.1.3.6.1.4.1.14179.1.1.5.1.0';

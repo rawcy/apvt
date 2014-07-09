@@ -1,60 +1,50 @@
-#!/usr/bin/perl
-
-##############################################
-##  Author:       Yin Chen                  ##                     
-##  Contact:      yinche@cisco.com          ##
-##  Data:         Nov 21 2013               ##
-##  Project:      apvt                      ##
-##############################################
-
-
-use strict;
 use warnings;
 use Net::SNMP qw(:snmp);
 use FindBin;
 use lib "$FindBin::Bin/lib";
 use OIDS;
-use Data::Dumper;
-use File::Slurp;
+use Log::Log4perl;
 require "$FindBin::Bin/lib/common_snmp.pl";
 
 BEGIN { our $start_run = time(); }
 
-my ($host, $community, $client_ip, $AP_MAC_dec, $community, $ERR, $controller_ip, $controller_community);
+require "$FindBin::Bin/lib/common_snmp.pl";
+require "$FindBin::Bin/conf/appt.conf";
+use vars qw ($gatingWLC $gatingCommunity $perl $log_conf);
+
+Log::Log4perl::init("$FindBin::Bin/conf/$log_conf");
+my $access_logger = Log::Log4perl->get_logger('appt_access');
+my $error_logger = Log::Log4perl->get_logger('appt_error');
+
+my ($host, $client_ip, $AP_MAC_dec, $community, $username, $ERR);
 if (@ARGV >= 1) {
     $client_ip = $ARGV[0];
     if (@ARGV >=2 ) {
         $AP_MAC_dec = $ARGV[1];
     }
-    if (@ARGV >=4) {
-        $controller_ip = $ARGV[2];
-        $controller_community = $ARGV[3];
+    if (@ARGV >=3) {
+         $username = $ARGV[2];
     }
 } else {
-    print "ERROR: no argument passed";
+    $error_logger->error("missing argument");
     exit 1;
 }
 
-if (! -r "$FindBin::Bin/conf/appt.conf") {
-     print "ERROR: apvt.conf is not readable\n";
-     exit 2;
-}
 # global variables
 
 require "$FindBin::Bin/conf/appt.conf";
-use vars qw ($gatingWLC $gatingCommunity %csv_file $perl);
-
-if ($controller_ip) {
-    $host = $gatingWLC;
-    $community = $gatingCommunity;
-} else {
-    $host = controller_ip;
-    $community = $controller_community;
-}
+use vars qw ($gatingWLC $gatingCommunity $perl);
 
 #mac_hex_decimal($client_mac_hex);
-my ($error_msg, $ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = search_client($host, $community, $client_ip, $AP_MAC_dec);
-print "$error_msg;$ap_name,$ap_eth_hex,$ap_rf_hex,$ap_ip,$p_wlc,$s_wlc,$location,$ap_grp";
+my ($error_msg, $ap_name, $ap_eth_hex, $ap_rf_hex, $ap_ip, $p_wlc, $s_wlc, $location, $ap_grp) = search_client($gatingWLC, $gatingCommunity, $client_ip, $AP_MAC_dec);
+if (defined $ap_name){
+    $access_logger->info("user: $username, found ap: $ap_name, eth: $ap_eth_hex, radio: $ap_rf_hex, ip: $ap_ip, prime wlc: $p_wlc, secondary wlc: $s_wlc, location: $location, ap group: $ap_grp");
+    print "$error_msg;$ap_name,$ap_eth_hex,$ap_rf_hex,$ap_ip,$p_wlc,$s_wlc,$location,$ap_grp";
+} else {
+    print "$error_msg;'','','','','','','',''"
+}
+
+exit 0;
 
 sub search_client {
     my ($host, $community, $client_ip, $AP_MAC_dec) = @_;
@@ -64,8 +54,7 @@ sub search_client {
     my ($error, $session) = snmp_connect($host, $community);
     if (!$session) {
         $err_msg = $error;      
-        printf("ERROR: %s.\n", $error);
-        print Dumper $error;
+    $error_logger->error("user: $username, $error");
         exit 1;
     } else {
         if (!$AP_MAC_dec) { # search the AP MAC by Client IP in WLC
@@ -92,6 +81,7 @@ sub search_client {
                -varbindlist    => [$bsnAPEthernetMacAddress]);
             $$session{'_nonblocking'}=0;
             if (!defined($result)) {
+        $error_logger->error("user: $username, $session->error");
                 $err_msg = "ERROR: $session->error";
                 $session->close;
                 exit 1;
@@ -121,7 +111,8 @@ sub search_client {
             $ap_rf_hex = format_mac_hex($$ap_info{"$bsnAPDot3MacAddress.$target_mac_dec"});   
             $ap_grp = $$ap_info{"$bsnAPGroupVlanName.$target_mac_dec"};  
         } else {
-            $err_msg = "Error: Couldn't find AP on WLC: $host";
+        $access_logger->warn("user: $username, Couldn't locate AP on WLC $host");
+            $err_msg = "Error: Couldn't locate AP on WLC: $host";
         }
     }
     $session->close();

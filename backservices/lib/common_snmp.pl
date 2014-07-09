@@ -25,9 +25,9 @@ use Net::SNMP qw(:snmp);
 #   $error          The error string if a connection could not be established
 sub snmp_connect {
     my ($hostname, $community) = @_;
-	
-	#my $connection = `ping -c 3 -W 2 $hostname | grep -c "64 bytes"`; 
-	#return ("the $hostname is not reachable\n") if $connection < 1;
+  
+  #my $connection = `ping -c 3 -W 2 $hostname | grep -c "64 bytes"`; 
+  #return ("the $hostname is not reachable\n") if $connection < 1;
 
     my ($session, $error) = Net::SNMP->session(
                                -hostname      => $hostname,
@@ -41,7 +41,7 @@ sub snmp_connect {
     # Increase the size of the buffer coz some queries were failing (default 1472)
     $session->max_msg_size(1472*5);
 
-	#Get the linux standard timestamp
+  #Get the linux standard timestamp
     my @param_arr = ('-timeticks' => 0);
     $session->translate(\@param_arr);
 

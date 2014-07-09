@@ -1,7 +1,7 @@
 //////////////////////////////////////////////
-//  Author:       Yin Chen                  //                     
+//  Author:       Yin Chen                  //
 //  Contact:      yinche@cisco.com          //
-//  Data:         Dec 13 2013                //
+//  Data:         Dec 13 2013               //
 //  Project:      apvt                      //
 //////////////////////////////////////////////
 
@@ -197,7 +197,7 @@ function loadTemplate(template_url, property_url, ap_eth_mac, ap_radio_mac) { //
                         $('#template_table tr:last').after("<tr class='template_field'> <td> <label for='property'>" + template_fields_array[i] + "</label> </td> <td> <input class=\"template_input\" type=\"text\" name=\"" + template_fields_array[i].toLowerCase() + "_" + input_type_array[i].toLowerCase() + "\" size=\"" + fields_limits_array[i] + "\" maxlength=\"" + fields_limits_array[i] + "\" id=\"" + template_fields_array[i].toLowerCase() + "\" /> </td> </tr>");
 
                     }
-                    $('#template_table tr:last').after("<tr class='template_field'> <td> <button action=\"action\" value=\"Back\" onclick=\"inputValidation(\'" + property_url + "');\">Next</button> </td> <td></td><td><button onclick=\"history.go(-1);\">Back</button></td></tr>");
+                    $('#template_table tr:last').after("<tr class='template_field'> <td> <button action=\"action\" value=\"Back\" onclick=\"inputValidation(\'" + property_url + "');\">Next</button> </td><td><button onclick=\"history.go(-1);\">Back</button></td></tr>");
 
                     $('#template_fieldset').css( "background-color", data.color);
               } 
@@ -295,7 +295,7 @@ function inputValidation(property_url) {
     } 
 }
 
-function submitChange(submitchange_url, validation_url) {
+function submitChange(submitchange_url) {
     var provisioning_info = JSON.parse(readCookie("provisioning_info"));
     var ap_info = JSON.parse(readCookie("ap_info"));
     var client_ip = readCookie("client_ip");
@@ -306,7 +306,7 @@ function submitChange(submitchange_url, validation_url) {
         async: false,
         dataType: "json",
         // send property as parameters to the Perl script
-        data: "ap_name=" + provisioning_info.provisioning_name + "&ap_radio_mac=" + ap_info.radio_mac + "&primary_controller_name=" + provisioning_info.primary_controller_name + "&primary_controller_ip=" + provisioning_info.primary_controller_ip + "&secondary_controller_name=" + provisioning_info.secondary_controller_name + "&secondary_controller_ip=" + provisioning_info.secondary_controller_ip"&ap_group=" + provisioning_info.ap_group  + "&ap_location=\"" + provisioning_info.provisioning_location + "\"",
+        data: "ap_name=" + provisioning_info.provisioning_name + "&ap_radio_mac=" + ap_info.radio_mac + "&primary_controller_name=" + provisioning_info.primary_controller_name + "&primary_controller_ip=" + provisioning_info.primary_controller_ip + "&secondary_controller_name=" + provisioning_info.secondary_controller_name + "&secondary_controller_ip=" + provisioning_info.secondary_controller_ip + "&ap_location=" + provisioning_info.provisioning_location + "&ap_group=" + provisioning_info.ap_group,
         // script call was *not* successful
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             $('div#template_msg').text("responseText: " + XMLHttpRequest.responseText 
@@ -320,14 +320,12 @@ function submitChange(submitchange_url, validation_url) {
         success: function(data){
             if(!data.err){
                 $('#comfirm_table').fadeOut();
-                $('div#template_msg').text("<p>AP should be rebooted in few minutes and broadcasting production SSID<p> <button onclick=\"validation('validation_url', 'ap_info.eth_mac', 'provisioning_info.primary_controller_ip');\">Submit</button> ");
+                $('div#template_msg').text("AP should be rebooted in few minutes and broadcasting production SSID");
                 $('div#template_msg').removeClass("error");
-                $(".clr_red").removeClass("clr_red");
                 $('div#template_msg').fadeIn();
             } else {
                 $('div#template_msg').text("");
                 $('div#template_msg').removeClass("error");
-                $(".clr_red").removeClass("clr_red");
                 $('div#template_msg').fadeIn();
                 alert("failed" + data.name);
             } 
@@ -335,17 +333,18 @@ function submitChange(submitchange_url, validation_url) {
     });
 }
 
-function validation(validation_url, ap_eth_mac, controller_ip) {
-    var client_ip = readCookie('clientip')
-    var provisioning_info = JSON.parse(readCookie("provisioning_info"));
-    .ajax({
+function flashAp(flashAp_url, ap_radio_mac) {
+    $('div#template_msg').text("");
+    $('div#template_msg').removeClass("error");
+    $('div#template_msg').fadeOut();
+    $.ajax({
         type: "GET",
-        url: validation_url, // URL of the Perl script
+        url: flashAp_url, // URL of the Perl script
         contentType: "application/json; charset=utf-8",
         async: false,
         dataType: "json",
-        // send property as parameters to the Perl script
-        data: "ap_eth_mac=" + ap_eth_mac + "&controller_ip" + controller_ip + "&client_ip" + client_ip;
+    // send property as parameters to the Perl script
+    data: "ap_radio_mac=" + ap_radio_mac,
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             $('div#template_msg').text("responseText: " + XMLHttpRequest.responseText 
             + ", textStatus: " + textStatus 
@@ -354,22 +353,14 @@ function validation(validation_url, ap_eth_mac, controller_ip) {
             $('div#template_msg').fadeIn();
         }, // error
         success: function(data){
-            if(!data.err){
-                if ((provisioning_info.primary_controller_ip == data.primary_controller_ip) && provisioning_info.provisioning_name == data.apname) && provisioning_info.provisioning_location == data.aplocation) && provisioning_info.ap_group == data.ap_group)){
-                    $('#comfirm_table').fadeOut();
-                    $('div#template_msg').text("<p>AP provissioned correctly<p> <button onclick=\"logout('document.URL');\">logout</button> ");
-                    $('div#template_msg').removeClass("error");
-                    $(".clr_red").removeClass("clr_red");
-                    $('div#template_msg').fadeIn();
-                }
-                
-            } else {
-                $('div#template_msg').text("");
-                $('div#template_msg').removeClass("error");
-                $(".clr_red").removeClass("clr_red");
+            if(!data.error){
+        //doing some notifications
+        } else {
+                $('div#template_msg').text("unable to flashing the AP, please check the AP is online");
+                $('div#template_msg').addClass("error");
                 $('div#template_msg').fadeIn();
-                alert("failed" + data.name);
-            } 
+            }
+
         }
     });
 }

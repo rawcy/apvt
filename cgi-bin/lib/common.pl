@@ -1,6 +1,4 @@
 
-# Common procedures
-
 ##############################################
 ##  Author:       Yin Chen                  ##
 ##  Contact:      yinche@cisco.com          ##
